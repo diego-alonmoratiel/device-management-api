@@ -1,18 +1,21 @@
 import pytest
 import pytest_asyncio
+import tempfile
+import os
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
-from sqlalchemy.pool import StaticPool
 from app.main import app
 from app.database import Base, get_db
 
-# Base de datos en memoria para tests
-TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+temp_db = tempfile.NamedTemporaryFile(delete=False, suffix=".db")
+temp_db_path = temp_db.name
+temp_db.close()
+
+TEST_DATABASE_URL = f"sqlite+aiosqlite:///{temp_db_path}"
 
 engine_test = create_async_engine(
     TEST_DATABASE_URL,
-    connect_args={"check_same_thread": False},  # Allow async threads to access same DB
-    poolclass=StaticPool,                        # Use StaticPool to reuse same connection
+    connect_args={"check_same_thread": False},
 )
 AsyncSessionTest = async_sessionmaker(engine_test, expire_on_commit=False)
 
@@ -29,6 +32,15 @@ async def setup_db():
     yield
     async with engine_test.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def cleanup_temp_db():
+    """Cleanup temporary database file after all tests"""
+    yield
+    if os.path.exists(temp_db_path):
+        os.unlink(temp_db_path)
+
 
 @pytest_asyncio.fixture
 async def client():

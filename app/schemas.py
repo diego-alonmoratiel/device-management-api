@@ -33,6 +33,7 @@ class MetricCreate(BaseModel):
     value: float
     unit: str | None = None
 
+
 class MetricResponse(BaseModel):
     id: int
     device_id: int

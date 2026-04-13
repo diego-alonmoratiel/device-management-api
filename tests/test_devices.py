@@ -106,7 +106,7 @@ async def test_list_metrics(client):
     created = await client.post("/devices/", json={"name": "node-01", "type": "server"})
     device_id = created.json()["id"]
     await client.post(f"/devices/{device_id}/metrics", json={"key": "cpu_usage", "value": 40.0})
-    await client.post(f"/devices/{device_id}/metrics", json={"key": "cpu_usage", "value": 50.0})
+    await client.post(f"/devices/{device_id}/metrics", json={"key": "ram_usage", "value": 50.0})
     response = await client.get(f"/devices/{device_id}/metrics")
     assert len(response.json()) == 2
 

@@ -1,0 +1,45 @@
+stages:
+  - lint
+  - test
+  - build
+
+variables:
+  DOCKER_HUB_USER: "diegoalonmoratiel"
+  IMAGE_NAME: "$DOCKER_HUB_USER/device-management-api"
+  IMAGE_TAG: $CI_COMMIT_SHORT_SHA
+
+lint:
+  stage: lint
+  image: python:3.11-slim
+  before_script:
+    - pip install flake8
+  script:
+    - flake8 app/ --max-line-length=100 --exclude=__init__.py
+  rules:
+    - if: $CI_COMMIT_BRANCH
+
+test:
+  stage: test
+  image: python:3.11-slim
+  before_script:
+    - pip install -r requirements.txt
+  script:
+    - pytest tests/ -v --cov=app --cov-report=term-missing
+  coverage: '/TOTAL.*\s+(\d+%)$/'
+  rules:
+    - if: $CI_COMMIT_BRANCH
+
+build:
+  stage: build
+  image: docker:24
+  services:
+    - docker:24-dind
+  before_script:
+    - docker login -u $DOCKER_HUB_USER -p $DOCKER_HUB_PASS
+  script:
+    - docker build -t $IMAGE_NAME:$IMAGE_TAG .
+    - docker build -t $IMAGE_NAME:latest .
+    - docker push $IMAGE_NAME:$IMAGE_TAG
+    - docker push $IMAGE_NAME:latest
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"

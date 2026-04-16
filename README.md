@@ -1,4 +1,4 @@
-# API_DEVICES_STATUS
+# Device Management API
 [![pipeline status](https://gitlab.com/diego-alonmoratiel-group/API_DEVICES_STATUS/badges/main/pipeline.svg)](https://gitlab.com/diego-alonmoratiel-group/API_DEVICES_STATUS/-/pipelines)
 [![coverage](https://gitlab.com/diego-alonmoratiel-group/API_DEVICES_STATUS/badges/main/coverage.svg)](https://gitlab.com/diego-alonmoratiel-group/API_DEVICES_STATUS/-/pipelines)
 
